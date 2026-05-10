@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0A0E14" />
+  <title>Курсы будущего — портфолио разработчика курсов</title>
+  <meta name="description" content="ИИ × Игра × Методология. Разработка образовательных курсов: игровые форматы, чат-боты, лонгриды, видео." />
+  <!-- Lotus Eater Sans — локально /fonts; заголовки блоков. Остальное — Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,600;1,600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <script>
+    try {
+      if (sessionStorage.getItem('edufut_preloader_done') === '1') {
+        document.documentElement.classList.add('preloader-skip');
+      }
+    } catch (e) { /* private mode */ }
+  </script>
+  <!-- Прелоадер: имитация инициализации системы (ТЗ § анимации) -->
+  <div id="preloader" class="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <p class="preloader__line mono">[ INITIALIZING SYSTEM ]</p>
+      <p class="preloader__line mono">[ LOADING ASSETS<span class="preloader__dots">...</span> ]</p>
+      <div class="preloader__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span id="preloader-fill" class="preloader__fill"></span>
+      </div>
+      <p id="preloader-pct" class="preloader__pct mono">0%</p>
+      <p id="preloader-ready" class="preloader__ready mono hidden">[ READY ● ]</p>
+    </div>
+  </div>
+
+  <!-- Кастомный курсор (на тачскринах отключится в JS) -->
+  <div id="cursor" class="cursor" aria-hidden="true"></div>
+
+  <!-- Фиксированный космический фон: сетка, звёзды, туманности -->
+  <div class="cosmic-bg" aria-hidden="true">
+    <svg class="cosmic-bg__grid" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="coord-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+          <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#coord-grid)" />
+    </svg>
+    <canvas id="stars-canvas" class="cosmic-bg__stars"></canvas>
+    <div class="cosmic-bg__nebula cosmic-bg__nebula--warm"></div>
+    <div class="cosmic-bg__nebula cosmic-bg__nebula--cold"></div>
+  </div>
+
+  <!-- SVG noise overlay на весь экран -->
+  <svg class="noise-overlay" aria-hidden="true">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" opacity="0.04" />
+  </svg>
+
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="site-header" id="site-header">
+    <div class="site-header__bar panel-hud">
+      <a href="#hero" class="site-header__brand">ЭДУФУТУРИЗМ // EDUFUTURISM</a>
+      <nav class="site-header__nav mono" aria-label="Основное меню">
+        <a href="#services">Услуги</a>
+        <a href="#cases">Кейсы</a>
+        <a href="#blog">Блог</a>
+        <a href="#about">О себе</a>
+      </nav>
+      <button type="button" class="site-header__burger mono" aria-label="Открыть меню" id="burger">☰</button>
+      <a href="#contact" class="btn btn--cta site-header__cta">ОБСУДИТЬ ПРОЕКТ</a>
+    </div>
+    <div id="mobile-drawer" class="mobile-drawer" hidden>
+      <nav class="mobile-drawer__nav mono">
+        <a href="#services">Услуги</a>
+        <a href="#cases">Кейсы</a>
+        <a href="#blog">Блог</a>
+        <a href="#about">О себе</a>
+        <a href="#contact" class="btn btn--primary">ОБСУДИТЬ ПРОЕКТ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- БЛОК 1: HERO (рамка .hero-inner = ширине шапки 1200px — совпадает с оранжевой обводкой меню) -->
+    <section class="section section--hero" id="hero">
+      <div class="hero-inner">
+        <div class="hud-corners--hero" aria-hidden="true"></div>
+        <p class="hero__meta mono fade-in" data-delay="0">// 001 / Озолина Ольга — разработчик курсов</p>
+        <p class="hero__sys mono hero__sys--tl">[ NAV / 0.0.1 ]</p>
+        <p class="hero__sys mono hero__sys--tr">[ SYS.READY ● ONLINE ]</p>
+        <h1 class="hero__title display" id="hero-title">
+          <span class="hero__title-line glitch-target">Обучение будущего</span>
+          <span class="hero__title-line glitch-target">здесь</span>
+        </h1>
+        <div class="hero__tags mono fade-in" aria-label="Направления">
+          <span class="hero__tag">ИИ-технологии</span>
+          <span class="hero__tag">Геймификация</span>
+          <span class="hero__tag">Наука об обучении</span>
+        </div>
+        <p class="hero__subtitle"> Создаю курсы, которые раньше казались фантастикой</p>
+        <div class="hero__actions">
+          <a href="#services" class="btn btn--primary"><span class="btn__icon">▶</span> ИССЛЕДОВАТЬ</a>
+          <a href="#cases" class="btn btn--ghost"><span class="btn__icon">◉</span> ПОСМОТРЕТЬ КЕЙСЫ</a>
+        </div>
+        <p class="hero__scroll mono blink"><span class="bracket">[</span> SCROLL TO BEGIN <span aria-hidden="true">▼</span> <span class="bracket">]</span></p>
+      </div>
+    </section>
+
+    <!-- БЛОК 2: О СЕБЕ (бегущая строка — отдельно под панелью) -->
+    <section class="section section--panel" id="about">
+      <div class="section-inner">
+        <div class="panel about-panel">
+          <div class="section-tag mono">⌐ // 002 / IDENTITY ───────────────</div>
+          <div class="about-title-row">
+            <h2 class="section-heading">КТО Я</h2>
+            <div class="about-title-tags mono" aria-label="Ключевые факты">
+              <span class="about-title-tag">8 лет опыта</span>
+              <span class="about-title-tag">30+ курсов</span>
+            </div>
+          </div>
+          <div class="about-grid">
+            <div class="about-photo hud-frame">
+              <div class="about-photo__circle glitch-photo">
+                <img src="avatar.png" alt="Ольга — разработчик курсов" width="280" height="280" loading="lazy" />
+              </div>
+              <p class="mono about-photo__cap">[ SCAN COMPLETE ● ID VERIFIED ]</p>
+              <button type="button" class="btn btn--ghost mono about-photo__education" id="btn-about-education">
+                Узнать про образование
+              </button>
+            </div>
+            <div class="about-data about-data--plain">
+              <p class="mono about-data__label">// PERSONNEL FILE</p>
+              <ul class="about-data__list mono">
+                <li><span>NAME:</span> [ Ольга ]</li>
+                <li><span>ROLE:</span> Разработчик курсов</li>
+                <li><span>EXPERIENCE:</span> 8+ лет</li>
+                <li><span>SPECIALTY:</span> ИИ × Игра × Методология</li>
+                <li><span>STATUS:</span> ● ACTIVE</li>
+                <li><span>MISSION:</span> Захватывающее обучение</li>
+              </ul>
+              <div class="about-bio">
+                <p> 8 лет я работаю в обучении, была наставником подростков, преподавателем в колледже, методистом в университете и центре повышения квалификации, сейчас я разрабатываю курсы в фармацевтической компании. </p>
+                <p> За эти годы я создала 30+ курсов по охране труда, производственным процессам, soft и hard skills. Сегодня у меня в руках инструменты, которые ещё пять лет назад казались фантастикой. Я строю на этом курсы будущего, которые захватывают внимание с первой минуты и остаются в памяти после финала.</p>
+                </div>
+              <p class="about-sign">— Ольга</p>
+            </div>
+          </div>
+        </div>
+        <div class="tools-marquee tools-marquee--below panel-strip mono" aria-hidden="true">
+          <div class="tools-marquee__track" id="tools-marquee-track"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- БЛОК 3: УСЛУГИ -->
+    <section class="section section--panel" id="services">
+      <div class="panel section-inner">
+        <div class="section-tag mono">⌐ // 003 / SERVICES ───────────────</div>
+        <h2 class="section-heading">ЧТО Я МОГУ СДЕЛАТЬ ДЛЯ ВАС</h2>
+
+        <p class="mono sublabel">── 03.1 / FORMATS ──</p>
+        <h3 class="section-subheading">ФОРМАТЫ КУРСОВ</h3>
+        <div id="formats-grid" class="grid-formats"></div>
+
+        <hr class="hud-rule" />
+        <p class="mono sublabel">── 03.2 / COLLABORATION ────────────────────────────</p>
+        <h3 class="section-subheading section-subheading--lotus">КАК МЫ МОЖЕМ РАБОТАТЬ ВМЕСТЕ</h3>
+        <p class="lead">Два варианта: создать курс с нуля или довести до ума уже существующий</p>
+        <div id="collab-grid" class="grid-collab"></div>
+
+        <hr class="hud-rule" />
+        <p class="mono sublabel">── 03.3 / SUPPORTING MATERIALS ─────────────────────</p>
+        <h3 class="section-subheading section-subheading--lotus">ДОПОЛНИТЕЛЬНЫЕ МАТЕРИАЛЫ</h3>
+        <p class="lead">К любому курсу я делаю сопровождающие материалы — то, что остаётся у пользователя после обучения </p>
+        <div id="materials-grid" class="grid-materials"></div>
+        <div class="block-cta">
+          <button type="button" class="btn btn--ghost" id="btn-materials-cta">▶ НУЖНЫ МАТЕРИАЛЫ ОТДЕЛЬНО ОТ КУРСА? — ОБСУДИМ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- БЛОК 4: СОСТАВ / ЯДРО -->
+    <section class="section section--panel" id="course-core">
+      <div class="panel section-inner">
+        <div class="core-hud mono">
+          <span>⌐ // 004 / COURSE CORE ───────────────</span>
+          <span id="core-status" class="core-hud__status">[ STATUS: 0/4 ACTIVE • CORE: STANDBY ]</span>
+        </div>
+        <h2 class="section-heading">ИЗ ЧЕГО СОСТОЯТ МОИ КУРСЫ</h2>
+        <p class="lead">Каждый мой курс собран из 4 ключевых компонентов. Активируйте каждый — увидите, как создаётся курс.</p>
+
+        <div class="core-layout">
+          <div class="core-desc hud-card" id="core-desc">
+            <!-- Текст подставляется из JS -->
+          </div>
+          <div class="core-visual">
+            <svg class="core-svg" id="core-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Интерактивное ядро курса">
+              <circle class="core-orbit" cx="200" cy="200" r="140" fill="none" stroke="rgba(192,200,216,0.2)" stroke-dasharray="4 8"/>
+              <g id="core-lines"></g>
+              <g id="core-nodes"></g>
+              <circle id="core-center" class="core-center" cx="200" cy="200" r="36" />
+            </svg>
+            <div class="core-actions">
+              <button type="button" class="btn btn--small btn--ghost" id="core-reset">RESET</button>
+              <button type="button" class="btn btn--small btn--primary" id="core-activate-all">АКТИВИРОВАТЬ ВСЕ</button>
+            </div>
+            <div class="core-metrics mono" id="core-metrics"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Визуальное «До / После»: ползунок + таблица (якорь #compare) -->
+    <section class="section section--panel section--showcase" id="visual-showcase" aria-label="Как может выглядеть курс: до и после">
+      <div class="panel section-inner">
+        <p class="section-tag mono">⌐ // 004.9 / VISUAL LOG ───────────────</p>
+        <h2 class="section-subheading section-subheading--showcase section-subheading--lotus">СМОТРИТЕ<span class="heading-comma">,</span> КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ</h2>
+        <p class="lead showcase-lead">Перетащите ползунок: слева — типичный курс, справа — версия «после» переработки </p>
+
+        <div class="ba-visual" id="showcase-ba">
+          <div class="ba-visual__viewport" id="showcase-ba-viewport">
+            <div class="ba-visual__layer ba-visual__layer--before">
+              <img class="ba-visual__img" src="slide_before.png" alt="Типичный курс до переработки" width="1280" height="720" decoding="async" loading="lazy" />
+              <span class="ba-visual__layer-badge mono">ДО · TYPICAL</span>
+            </div>
+            <div class="ba-visual__layer ba-visual__layer--after" id="showcase-after-layer" aria-hidden="false">
+              <img class="ba-visual__img" src="slide_after.png" alt="Курс после переработки" width="1280" height="720" decoding="async" loading="lazy" />
+              <span class="ba-visual__layer-badge ba-visual__layer-badge--after mono">ПОСЛЕ · FUTURE</span>
+            </div>
+            <button type="button" class="ba-visual__handle mono" id="showcase-ba-handle" aria-label="Граница до и после" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+              <span class="ba-visual__handle-icon" aria-hidden="true">◆</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="compare-block-follow" id="compare">
+          <div class="compare compare--static" id="compare-static">
+            <div class="compare__side compare__side--before">
+              <p class="mono compare__badge">[ TYPICAL COURSE / 001 ]</p>
+              <ul class="compare__list compare__list--bad">
+                <li>× Слайды и тест в конце</li>
+                <li>× PowerPoint-эстетика</li>
+                <li>× «Прочти и сдай»</li>
+                <li>× Забывается через неделю</li>
+                <li>× Сделан «для галочки»</li>
+                <li>× Ученик — пассивный зритель</li>
+              </ul>
+              <div class="compare__bars" data-compare-bars="before"></div>
+            </div>
+            <div class="compare__side compare__side--after">
+              <p class="mono compare__badge">[ FUTURE COURSE / 002 ]</p>
+              <ul class="compare__list compare__list--good">
+                <li>✓ Сценарий, тренажёр, выбор</li>
+                <li>✓ Продуманные UX/UI-дизайн и геймификация </li>
+                <li>✓ «Попробуй и пойми»</li>
+                <li>✓ Возвращаются за материалами</li>
+                <li>✓ Сделан как продукт</li>
+                <li>✓ Ученик — герой истории</li>
+              </ul>
+              <div class="compare__bars" data-compare-bars="after"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- БЛОК 6: ИНСТРУМЕНТЫ -->
+    <section class="section section--panel section--elevated" id="toolkit">
+      <div class="panel section-inner">
+        <div class="section-tag mono">⌐ // 006 / TOOLKIT ───────────────</div>
+        <h2 class="section-heading">ИНСТРУМЕНТЫ БУДУЩЕГО</h2>
+        <p class="lead">ИИ — незаменимый инструмент в моей работе. Это даёт скорость, свободу и качество, которые раньше были недоступны.</p>
+        <div id="tools-grid" class="grid-tools"></div>
+      </div>
+    </section>
+
+    <!-- БЛОК 7: ДЛЯ КОГО -->
+    <section class="section section--panel" id="audience">
+      <div class="panel section-inner">
+        <div class="section-tag mono">⌐ // 007 / TARGET AUDIENCE ───────────────</div>
+        <h2 class="section-heading">ДЛЯ КОГО Я РАБОТАЮ</h2>
+        <div id="audience-grid" class="grid-audience"></div>
+      </div>
+    </section>
+
+    <!-- БЛОК 8: КЕЙСЫ -->
+    <section class="section section--panel" id="cases">
+      <div class="panel section-inner">
+        <div class="section-tag mono">⌐ // 008 / CASE FILES ───────────────</div>
+        <h2 class="section-heading">АРХИВ ПРОЕКТОВ</h2>
+        <div id="cases-grid" class="grid-cases"></div>
+      </div>
+    </section>
+
+    <!-- БЛОК 9: БЛОГ -->
+    <section class="section section--panel section--light" id="blog">
+      <div class="panel section-inner">
+        <div class="section-tag mono section-tag--on-light">// 008 / БЛОГ · ЗАМЕТКИ МЕТОДОЛОГА</div>
+        <div id="blog-list" class="blog-list"></div>
+        <a href="https://t.me/kreksfekskurs" class="btn btn--ghost btn--dark btn--multiline" target="_blank" rel="noopener noreferrer">▶ Больше постов в телеграм-канале (@kreksfekskurs)</a>
+      </div>
+    </section>
+
+    <!-- БЛОК 10: FAQ -->
+    <section class="section section--panel" id="faq">
+      <div class="panel section-inner panel--narrow">
+        <div class="section-tag mono">⌐ // 010 / KNOWLEDGE BASE ───────────────</div>
+        <h2 class="section-heading section-heading--hud">ВОПРОСЫ И ОТВЕТЫ</h2>
+        <p class="lead center">Самые частые запросы. Не нашли своего — напишите, отвечу лично.</p>
+        <div id="faq-filters" class="faq-filters mono"></div>
+        <div id="faq-list" class="faq-list"></div>
+        <div class="faq-cta hud-card center">
+          <p>Понравился ответ? Если есть задача по курсу — расскажите, подскажу формат.</p>
+          <a href="#contact" class="btn btn--primary">▶ ОБСУДИТЬ ПРОЕКТ</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- БЛОК 11: КОНТАКТ -->
+    <section class="section section--contact" id="contact">
+      <div class="panel section-inner panel--contact contact-panel">
+        <div class="hud-corners" aria-hidden="true"></div>
+        <p class="mono section-tag-center">// 011 / TRANSMISSION</p>
+        <div class="contact-signal mono" aria-hidden="true"><span></span><span></span><span></span> TRANSMITTING <span></span><span></span><span></span></div>
+        <h2 class="section-heading">УСТАНОВИТЬ СОЕДИНЕНИЕ</h2>
+        <p class="lead center contact-lead">Расскажите о задаче — соберём курс будущего вместе </p>
+        <a href="https://t.me/yarozol" class="btn btn--primary btn--large" target="_blank" rel="noopener noreferrer"><span class="btn__icon">▶</span> НАЧАТЬ РАЗГОВОР</a>
+        <ul class="contact-lines mono">
+          <li><a href="https://t.me/yarozol" target="_blank" rel="noopener">TELEGRAM → @yarozol</a></li>
+          <li><a href="mailto:ozolgayar@gmail.com">EMAIL → ozolgayar@gmail.com</a></li>
+        </ul>
+        <div class="contact-meta mono">
+          <span>[ STATUS: AVAILABLE FOR NEW PROJECTS ]</span>
+          <span>[ RESPONSE TIME: WITHIN 24H ]</span>
+          <span>[ TIMEZONE: GMT+3 ]</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <p class="site-footer__title"> Озолина Ольга, разработчик курсов / 2026</p>
+        <p class="display site-footer__brand">КУРСЫ БУДУЩЕГО</p>
+      </div>
+      <p class="mono site-footer__mid">[ MADE WITH AI × HUMAN HANDS ]</p>
+    </div>
+    <p class="mono site-footer__end">[ ⌐ END OF TRANSMISSION ¬ ]</p>
+  </footer>
+
+  <!-- Модальное окно: формат курса -->
+  <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal panel-hud">
+      <button type="button" class="modal__close mono" id="modal-close" aria-label="Закрыть">[ ✕ ]</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Модальное окно: кейс -->
+  <div id="case-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="case-modal-title">
+    <div class="modal modal--wide panel-hud">
+      <button type="button" class="modal__close mono" id="case-close" aria-label="Закрыть">[ ✕ ]</button>
+      <div id="case-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Модальное окно: сертификаты (образование) -->
+  <div id="cert-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="cert-modal-title">
+    <div class="modal modal--wide modal--certs panel-hud">
+      <button type="button" class="modal__close mono" id="cert-close" aria-label="Закрыть">[ ✕ ]</button>
+      <h3 id="cert-modal-title" class="section-subheading cert-modal__title">Образование</h3>
+      <p class="mono cert-modal__sub">⌐ Сертификаты — используйте стрелки или клавиши ◀ ▶</p>
+      <div class="cert-slider">
+        <button type="button" class="cert-slider__nav mono" id="cert-prev" aria-label="Предыдущий сертификат">◀</button>
+        <div class="cert-slider__viewport">
+          <img id="cert-slide-img" class="cert-slider__img" src="" alt="" width="960" height="540" decoding="async" loading="lazy" />
+        </div>
+        <button type="button" class="cert-slider__nav mono" id="cert-next" aria-label="Следующий сертификат">▶</button>
+      </div>
+      <p class="mono cert-slider__counter" id="cert-counter" aria-live="polite">1 / 1</p>
+    </div>
+  </div>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>
