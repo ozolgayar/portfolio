@@ -1,0 +1,1426 @@
+/**
+ * КУРСЫ БУДУЩЕГО — логика страницы (ванильный JS по ТЗ)
+ * Структура: данные внизу, инициализация после DOMContentLoaded
+ */
+
+'use strict';
+
+// --- ДАННЫЕ: форматы курсов (ТЗ блок 3.1) ---
+const FORMATS = [
+  {
+    id: 'FMT_001',
+    code: '01',
+    icon: '◆',
+    title: 'ИГРОВОЙ КУРС',
+    subtitle: 'Симулятор · Тренажёр · Квест',
+    description:
+      'Курс как игра: сценарий, выборы, последствия, прогресс. Учиться так же интересно, как играть.',
+    bestFor: 'Навыки, требующие практики: продажи, переговоры, разбор кейсов',
+    features: ['Ветвящийся сценарий', 'Адаптивная сложность', 'Система баллов и рейтингов', 'Достижения и бейджи'],
+    duration: 'От 4 недель (простая браузерная игра) до 6 месяцев (3D-симулятор)',
+  },
+  {
+    id: 'FMT_002',
+    code: '02',
+    icon: '◇',
+    title: 'ЧАТ-БОТ КУРС',
+    subtitle: 'Telegram · Вконтакте · Web',
+    description:
+      'Курс в формате диалога. Подаётся порциями, в удобное время, прямо в мессенджере. Высокая доходимость.',
+    bestFor: 'Микрообучение, привычки, поддержка после основного курса, soft skills',
+    features: ['Диалоговый сценарий', 'Микрозадания', 'Напоминания и триггеры'],
+    duration: '3–8 недель (зависит от сложности проекта)',
+  },
+  {
+    id: 'FMT_003',
+    code: '03',
+    icon: '◈',
+    title: 'ЛОНГРИД',
+    subtitle: 'Интерактивная веб-страница',
+    description:
+      'Курс как кинематографичный лонгрид: текст, графика, видео, интерактивы. Один URL — целое путешествие.',
+    bestFor: 'Сложные темы, сторителлинг, имиджевые проекты, портфолио экспертизы',
+    features: ['Кинематографичный визуал', 'Скролл-анимации', 'Встроенные интерактивы', 'Отлично индексируется'],
+    duration: '4–8 недель',
+  },
+  {
+    id: 'FMT_004',
+    code: '04',
+    icon: '◉',
+    title: 'EMAIL-КУРС',
+    subtitle: 'Письма по расписанию',
+    description:
+      'Серия писем с обучающим контентом. Приходит в удобном ритме, читается за 5–10 минут, остаётся в почте.',
+    bestFor: 'Прогрев аудитории, лид-магниты, нишевые темы, продление вовлечения после курса',
+    features: ['Структура из 5–15 писем', 'Авторский дизайн писем', 'Задания между письмами', 'Аналитика открытий'],
+    duration: '2–4 недели',
+  },
+  {
+    id: 'FMT_005',
+    code: '05',
+    icon: '⌬',
+    title: 'ВИДЕОКУРС',
+    subtitle: 'Лекции · Скринкасты · AI-видео',
+    description:
+      'Классический видеоформат, но с современным подходом. Динамичные сцены, монтаж и AI-видео.',
+    bestFor: 'Демонстрации, экспертные курсы, сложные процессы, визуальные навыки',
+    features: ['Сценарии и раскадровки', 'Монтаж и графика', 'AI-видео (Runway, Sora)', 'Озвучка (ElevenLabs)'],
+    duration: 'От 2 недель ("говорящая голова", 5-10 уроков) до 6 месяцев (50+ уроков, премиум-продакшен)',
+  },
+  {
+    id: 'FMT_006',
+    code: '06',
+    icon: '✦',
+    title: 'КУРС-ПОДКАСТ',
+    subtitle: 'Аудио · Скрипты · Хост-формат',
+    description:
+      'Курс, который слушают в дороге, на пробежке, за рулём. Аудиосерия с продуманным сценарием и драматургией.',
+    bestFor: 'Концептуальные темы, истории, soft skills, занятая аудитория',
+    features: ['Сценарии эпизодов', 'Запись или AI-озвучка', 'Сопроводительные материалы'],
+    duration: 'От 2 недель (запись одного эксперта, 5-8 эпизодов по 15 минут до 2-4 месяцев (подкаст-сериал, 20+ эпизодов, несколько актёров, саунд-дизайн)',
+  },
+];
+
+const COLLABORATION = [
+  {
+    id: 'COL_001',
+    code: 'A',
+    icon: '◢',
+    title: 'КУРС ПОД КЛЮЧ',
+    subtitle: 'Полный цикл — от идеи до запуска',
+    description:
+      'Беру задачу с нуля и веду до результата. Вы получаете готовый продукт: методология, контент, сборка, сопровождение (опционально).',
+    stages: [
+      { num: '01', name: 'Исследование', detail: 'Аудитория, цели, контекст' },
+      { num: '02', name: 'Методология', detail: 'Структура, сценарий, точки активности' },
+      { num: '03', name: 'Производство', detail: 'Тексты, визуал, видео, озвучка' },
+      { num: '04', name: 'Сборка', detail: 'LMS, чат-бот, веб — куда нужно' },
+      { num: '05', name: 'Запуск', detail: 'Тестирование, доработка, аналитика' },
+    ],
+    duration: '2–4 месяца',
+    forWhom: 'Бизнесу · Школам · Продюсерам · Экспертам',
+  },
+  {
+    id: 'COL_002',
+    code: 'B',
+    icon: '◣',
+    title: 'АУДИТ ИЛИ РЕДИЗАЙН',
+    subtitle: 'Доводим существующий курс до результата',
+    description:
+      'Если курс уже есть, но не работает как хочется — разбираю, нахожу слабые места и переделываю. Можно только аудит, можно с реализацией.',
+    stages: [
+      { num: '01', name: 'Аудит', detail: 'Методология, вовлечение, визуал, UX' },
+      { num: '02', name: 'План', detail: 'Что менять, в каком порядке, с каким эффектом' },
+      { num: '03', name: 'Редизайн', detail: 'Переработка по согласованному плану' },
+      { num: '04', name: 'Тест', detail: 'Проверка на пользователях, доработка' },
+    ],
+    duration: '2 недели – 2 месяца',
+    forWhom: 'Тем, у кого есть курс, но он не работает',
+  },
+];
+
+const MATERIALS = [
+  { icon: '▤', title: 'ГАЙДЫ', description: 'Подробные инструкции по применению знаний' },
+  { icon: '▥', title: 'ПАМЯТКИ', description: 'Краткие напоминания для быстрого использования' },
+  { icon: '▦', title: 'ЧЕК-ЛИСТЫ', description: 'Пошаговые проверочные списки для рутинных задач' },
+  { icon: '▧', title: 'РАБОЧИЕ ТЕТРАДИ', description: 'Структурированные материалы для практики' },
+  { icon: '▨', title: 'ШАБЛОНЫ', description: 'Готовые формы и документы под задачи' },
+  { icon: '▩', title: 'ПРЕЗЕНТАЦИИ', description: 'Авторская подача материала для встреч и обучения' },
+  { icon: '◰', title: 'ИНФОГРАФИКА', description: 'Сложные процессы — в одной картинке' },
+  { icon: '◱', title: 'FAQ И БАЗЫ ЗНАНИЙ', description: 'Структурированные ответы на частые вопросы' },
+];
+
+const COMPONENTS = [
+  {
+    id: 'CORE_01',
+    code: '01',
+    icon: '◆',
+    position: 'top',
+    cx: 200,
+    cy: 72,
+    circleLabel: 'История',
+    title: 'ИСТОРИЯ',
+    subtitle: 'Драматургия и сценарий',
+    description:
+      'Каждый курс начинается с истории. Герой, ситуация, выбор, последствия. Я разрабатываю драматургию, в которую хочется погрузиться.',
+    includes: ['Сценарий с завязкой и развязкой', 'Герой, с которым ассоциируется ученик', 'Конфликты и точки выбора', 'Эмоциональная дуга'],
+    weights: { completeness: 25, engagement: 30, quality: 20 },
+  },
+  {
+    id: 'CORE_02',
+    code: '02',
+    icon: '◉',
+    position: 'right',
+    cx: 328,
+    cy: 200,
+    circleLabel: 'Игра',
+    title: 'ИГРА',
+    subtitle: 'Механики и вовлечение',
+    description:
+      'Очки, выборы, последствия, прогресс. Учиться должно быть так же интересно, как играть. Игровые механики превращают теорию в опыт.',
+    includes: ['Геймификация прогресса', 'Ветвящиеся сценарии', 'Симуляции и тренажёры', 'Обратная связь как награда'],
+    weights: { completeness: 25, engagement: 35, quality: 20 },
+  },
+  {
+    id: 'CORE_03',
+    code: '03',
+    icon: '◈',
+    position: 'bottom',
+    cx: 200,
+    cy: 328,
+    circleLabel: 'Методология',
+    title: 'МЕТОДОЛОГИЯ',
+    subtitle: 'Смысл, структура, практика',
+    description:
+      'За красивой обёрткой — выверенная методология. Цели, структура, точки активности, практические задания. То, что превращает развлечение в обучение.',
+    includes: ['Чёткие учебные цели', 'Логичная структура модулей', 'Практические задания', 'Смысл, который остаётся после'],
+    weights: { completeness: 25, engagement: 15, quality: 35 },
+  },
+  {
+    id: 'CORE_04',
+    code: '04',
+    icon: '⌬',
+    position: 'left',
+    cx: 72,
+    cy: 200,
+    circleLabel: 'ИИ',
+    title: 'ИИ-ТЕХНОЛОГИИ',
+    subtitle: 'Визуал, видео, озвучка',
+    description:
+      'Авторский визуал, AI-видео, синтез голоса, генеративная графика. Современные инструменты для уровня качества, который раньше требовал команду.',
+    includes: ['Уникальные иллюстрации (Midjourney, Flux)', 'AI-видео (Runway, Sora)', 'Синтез голоса (ElevenLabs)', 'Единый визуальный стиль'],
+    weights: { completeness: 25, engagement: 20, quality: 25 },
+  },
+];
+
+const TOOLS = [
+  { name: 'ChatGPT', category: 'AI / TEXT', use: 'Сценарии, диалоги, методология' },
+  { name: 'Claude', category: 'AI / TEXT', use: 'Длинные тексты, аналитика' },
+  { name: 'Midjourney', category: 'AI / IMAGE', use: 'Креативные иллюстрации' },
+  { name: 'Seedance', category: 'AI / VIDEO', use: 'Кинематографичные ролики' },
+  { name: 'CapCut', category: 'APP / VIDEO', use: 'Монтаж видеоуроков' },
+  { name: 'ElevenLabs', category: 'AI / VOICE', use: 'Профессионалньая озвучка курсов' },
+  { name: 'Tilda', category: 'PLATFORM / SITE', use: 'Лонгриды с премиальным дизайном' },
+  { name: 'Cursor', category: 'AI / CODE', use: 'Интерактивные тренажёры, симуляции и мини-игры' },
+  { name: 'Suno', category: 'AI / MUSIC', use: 'ИИ-композитор  — создаёт авторскую музыку' },
+  { name: 'WEEK', category: 'PLATFORM', use: 'Создание базы знаний' },
+  { name: 'Figma', category: 'APP /DESIGN', use: 'Макеты и шаблоны в едином стиле' },
+  { name: 'HeyGen', category: 'AI / VIDEO', use: 'AI-актёр для видеокурсов' },
+];
+
+const AUDIENCES = [
+  {
+    id: 'MISSION_01',
+    icon: '◢',
+    title: 'БИЗНЕСУ',
+    subtitle: 'Корпоративное обучение',
+    description:
+      'Создаю корпоративные курсы для обучения сотрудников, адаптации новичков и развития команд. Упаковываю знания в курсы, которые сокращают время обучения в 2-3 раза.',
+    tags: ['Onboarding', 'Product Training', 'Soft Skills', 'Compliance'],
+  },
+  {
+    id: 'MISSION_02',
+    icon: '◣',
+    title: 'ШКОЛАМ И ВУЗАМ',
+    subtitle: 'Образовательные программы',
+    description:
+      'Создаю модули и программы для онлайн-школ, университетов и EdTech-платформ. Помогаю упаковать экспертизу преподавателей в современный формат с понятной структурой.',
+    tags: ['Online Schools', 'University', 'EdTech', 'Methodology'],
+  },
+  {
+    id: 'MISSION_03',
+    icon: '◤',
+    title: 'ЭКСПЕРТАМ И ПРОДЮСЕРАМ',
+    subtitle: 'Авторские курсы',
+    description:
+      'Если есть экспертиза, но нет понимания, как упаковать её в курс — я разберу опыт по полочкам и соберу в программу, которую интересно проходить. Запускаем за 2-3 месяца вместо года в одиночку.',
+    tags: ['Solo Course', 'Methodology', 'Production', 'Launch'],
+  },
+];
+
+const CASES = [
+  {
+    id: 'CASE_001',
+    year: '2025',
+    client: 'Тренажёр',
+    industry: 'hard skills',
+    title: 'Искусственный интеллект на каждый день',
+    description: 'Курс-тренажёр для освоения базовых навыков работы с ИИ',
+    metrics: { completion: '94%', satisfaction: '4.8/5', duration: '~ 1 час' },
+    cover: 'ai_cover.png',
+    demoVideo: 'video/AI for every day.mp4',
+  },
+  {
+    id: 'CASE_002',
+    year: '2026',
+    client: 'Сюжетный курс',
+    industry: 'ГО и ЧС',
+    title: 'Под куполом: спасти мир за 3 дня',
+    description: 'Фантастическая история о городе под куполом после глобальной катастрофы. Обучение навыкам ГО и ЧС.',
+    metrics: { satisfaction: '4.9/5', duration: '~3 часа' },
+    cover: 'go_cover.png',
+    coverPosition: 'left',
+    demoVideo: 'video/Go and chs.mp4',
+  },
+  {
+    id: 'CASE_003',
+    year: '2025',
+    client: 'Лонгрид',
+    industry: 'Soft skills',
+    title: 'Офис на кухне: как работать удалённо',
+    description: 'История семьи Поляковых, которые сталкиваются с трудностями удалённой работы',
+    metrics: { satisfaction: '5/5', duration: '8 недель' },
+    cover: 'office_cover.png',
+    demoVideo: 'video/Remote work.mp4',
+  },
+  {
+    id: 'CASE_004',
+    year: '2026',
+    client: 'Симулятор',
+    industry: 'Soft skills',
+    title: 'Есть контакт! Нетворкинг с удовольствием',
+    description: 'Симулятор знакомств в духе The Sims',
+    metrics: { satisfaction: '5/5', duration: '3 часа' },
+    cover: 'estkontakt_cover.png',
+    demoVideo: 'video/Estcontact.mp4',
+  },
+];
+
+/** Сертификаты из папки `sertificates/` — статический список путей. При добавлении файла допишите сюда номер или строку. */
+const EDUCATION_CERT_IMAGES = Array.from({ length: 6 }, (_, i) => `sertificates/${i + 1}.png`);
+
+const BLOG_POSTS = [
+  {
+    slug: 'students-completion',
+    href: 'posts/students-completion.html',
+    title: 'Почему студенты не доходят до конца курса: 7 причин и что с этим делать',
+    excerpt: 'Низкая доходимость чаще про устройство продукта, чем про лень учеников',
+    date: '01.05.2026',
+    mins: '14 мин',
+  },
+  {
+    slug: 'traditional-courses',
+    href: 'posts/traditional-courses.html',
+    title: 'Почему традиционные курсы не работают',
+    excerpt: 'Модель из университетов, линейный путь и что приходит на смену',
+    date: '24.04.2026',
+    mins: '16 мин',
+  },
+  {
+    slug: 'first-launch-expert',
+    href: 'posts/first-launch-expert.html',
+    title: 'Первый запуск курса: с чего начать, если ты — эксперт',
+    excerpt: 'Живой поток, интервью с аудиторией и чего не делать в пилоте',
+    date: '07.05.2026',
+    mins: '18 мин',
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    cat: 'start',
+    code: 'Q_001',
+    q: 'Как начинается работа?',
+    a: `<p>С короткого созвона минут на 30–40. Я задаю вопросы про вашу аудиторию, цель курса, в каком контексте он будет существовать и какие у вас есть ограничения. Этого разговора обычно хватает, чтобы понять, насколько мы подходим друг другу и какой формат сотрудничества имеет смысл.</p>
+        <p>После созвона два сценария. Если всё понятно с обеих сторон, то договариваемся о договоре и плане работы. Если нужно подумать или собрать больше информации, то я присылаю резюме встречи и предложение, которое вы можете спокойно изучить.</p>`,
+  },
+  {
+    cat: 'start',
+    code: 'Q_002',
+    q: 'А если у меня нет готового ТЗ?',
+    a: `<p> Это нормально. Мы можем сформулировать ТЗ вместе на этапе исследования. Я задаю вопросы, разбираюсь в вашей экспертизе и аудитории, а на выходе вы получаете внятный документ, по которому понятно, что именно делаем, в каком объёме и с каким результатом.</p>`,
+  },
+  {
+    cat: 'start',
+    code: 'Q_003',
+    q: 'Как выглядит процесс изнутри?',
+    a: `<p>Работа делится на пять этапов:</p>
+        <ol class="faq-ol">
+          <li><strong>Исследование.</strong> Разбираемся с аудиторией, её задачами, целями курса и контекстом, в котором он будет жить.</li>
+          <li><strong>Методология.</strong> Собираем структуру программы, прорабатываем сценарий обучения, продумываем задания и точки контроля.</li>
+          <li><strong>Производство.</strong> Готовим тексты, визуал, снимаем и монтируем видео.</li>
+          <li><strong>Сборка.</strong> Собираем курс там, где он будет жить: на LMS, в чат-боте или на сайте.</li>
+          <li><strong>Запуск.</strong> Тестируем на реальных людях, настраиваем аналитику, фиксируем, что работает, а что нужно докрутить.</li>
+        </ol>
+        <p>Все этапы прозрачны: у нас есть общая онлайн-доска, где видно текущий статус, ближайшие задачи и ответственных — в любой момент можно зайти и посмотреть.</p>`,
+  },
+  {
+    cat: 'budget',
+    code: 'Q_004',
+    q: 'Сколько стоит разработка курса?',
+    a: `<p>Без брифа ответить сложно. Курс на 4 урока в чат-боте и многомодульная программа с видео и проверкой заданий — это разные проекты по трудозатратам.</p>
+        <p>После короткого брифа я присылаю смету, в которой расписано, из чего складывается стоимость: какие этапы, что в них входит, сколько времени и какие подрядчики нужны. Вы видите, за что платите, и можете убрать или добавить блоки под свой бюджет.</p>
+        <p><a href="#contact" class="link-cta">▶ ЗАПРОСИТЬ РАСЧЁТ</a></p>`,
+  },
+  {
+    cat: 'budget',
+    code: 'Q_005',
+    q: 'Сколько времени занимает работа?',
+    a: `<p>Зависит от формата, например, примерные сроки:</p>
+        <ul class="faq-ul">
+          <li>Аудит существующего курса — 1–2 недели.</li>
+          <li>Мессенджер-курс (в боте, без сложного видео) — 3–6 недель.</li>
+          <li>Производственные форматы (с видео, текстами, заданиями) — 4–8 недель.</li>
+          <li>Под ключ (исследование, методология, производство, сборка, запуск) — 2–4 месяца.</li>
+        </ul>
+        <p>Это рабочие ориентиры, по которым можно планировать.</p>`,
+  },
+  {
+    cat: 'scope',
+    code: 'Q_006',
+    q: 'Можно ли заказать только часть работ?',
+    a: `<p>Да, можно взять отдельно: методологию (если вы сами производите контент, но нужна структура и сценарий), тексты, визуал, аудит уже существующего курса, материалы для сопровождения студентов после запуска. Каждый блок работает как самостоятельная единица со своими сроками, сметой и результатом. Если по ходу окажется, что нужен ещё один блок, его можно добавить отдельным этапом.</p>`,
+  },
+  {
+    cat: 'scope',
+    code: 'Q_007',
+    q: 'А не пострадает ли качество от ИИ?',
+    a: `<p>Нет, ИИ — это инструмент, а не автор. Методология, фактчекинг, сценарий курса, дизайн, контроль качества — всё это остаётся за людьми, ответственными за разработку курса.</p>`,
+  },
+  {
+    cat: 'after',
+    code: 'Q_008',
+    q: 'Что происходит после запуска курса?',
+    a: `<p>Первый месяц после старта курса — это отдельный этап работы. В него входит: тестирование, оперативные доработки по ходу, сопровождение по техническим и методическим вопросам и разбор первой аналитики. По итогам этого месяца курс становится заметно крепче, чем был на старте.</p>
+        <p>Дальше два варианта: либо передаём всё вашей команде с инструкциями и документацией, либо остаёмся на абонентском сопровождении для обновления, новых потоков и доработок.</p>`,
+  },
+  {
+    cat: 'after',
+    code: 'Q_009',
+    q: 'Кому принадлежат права на курс?',
+    a: `<p>Вам как заказчику. Все материалы, которые мы делаем в рамках проекта, переходят к вам.</p>
+        <p>Единственное, что обсуждается отдельно — использование проекта в моём портфолио. Здесь я всегда спрашиваю: можно ли упоминать вас как клиента, можно ли показывать кейс, какие материалы можно использовать в качестве примеров. Если по каким-то причинам проект конфиденциальный, то он останется за рамками портфолио.</p>`,
+  },
+  {
+    cat: 'after',
+    code: 'Q_010',
+    q: 'А если результат не понравится?',
+    a: `<p>Главная защита от этого — сама структура работы. Оплата идёт этапами, и в конце каждого этапа есть приёмка с понятным результатом: вы видите, что получилось, и принимаете решение, идём ли дальше. В каждом этапе заложены правки — не бесконечные, но достаточные, чтобы привести результат к тому, что вы хотели.</p>
+        <p>На практике до таких ситуаций почти не доходит, потому что мы много общаемся на старте и сверяемся по дороге. Но сама возможность выйти без потерь есть.</p>`,
+  },
+];
+
+const FAQ_CATS = [
+  { id: 'all', label: 'ВСЕ' },
+  { id: 'start', label: 'СТАРТ / ПРОЦЕСС' },
+  { id: 'budget', label: 'СРОКИ / БЮДЖЕТ' },
+  { id: 'scope', label: 'ОБЪЁМ / ИИ' },
+  { id: 'after', label: 'ПОСЛЕ ЗАПУСКА' },
+];
+
+/** Звёздное поле на canvas — редкое плавное мерцание */
+function initStars(canvas) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  /** У режима «уменьшить анимации» тени статичные без моргания */
+  let prefersReducedMotion = false;
+
+  function mqReducedMotion() {
+    prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  mqReducedMotion();
+
+  /** @type { Array<{ x: number; y: number; r: number; phase: number; amp: number; freq: number; jitter: number; base: number }>} */
+  let stars = [];
+  let w = 0;
+  let h = 0;
+
+  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', mqReducedMotion);
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    const count = Math.min(150, Math.floor((w * h) / 12000));
+    stars = [];
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 0.6 + Math.random() * 2.2,
+        phase: Math.random() * Math.PI * 2,
+        amp: 0.06 + Math.random() * 0.12,
+        base: 0.28 + Math.random() * 0.35,
+        freq: 0.003 + Math.random() * 0.008,
+        jitter: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+
+
+  function tick() {
+    ctx.clearRect(0, 0, w, h);
+    stars.forEach((s) => {
+      let a;
+      if (prefersReducedMotion) {
+        a = s.base + s.amp * 0.5;
+      } else {
+        s.phase += s.freq;
+        const shimmer =
+          Math.sin(s.phase) * s.amp + Math.sin(s.phase * 1.12 + s.jitter) * (s.amp * 0.18);
+        a = Math.min(1, Math.max(0.08, s.base + shimmer));
+      }
+      ctx.fillStyle = `rgba(232,230,224,${a.toFixed(4)})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(tick);
+}
+/** Прелоадер: один раз за сессию (см. sessionStorage в index + класс preloader-skip) */
+function runPreloader() {
+  const el = document.getElementById('preloader');
+  const fill = document.getElementById('preloader-fill');
+  const pct = document.getElementById('preloader-pct');
+  const ready = document.getElementById('preloader-ready');
+  if (!el || !fill || !pct) return;
+
+  const STORAGE_KEY = 'edufut_preloader_done';
+
+  function finish(skipAnimate) {
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    const bar = el.querySelector('.preloader__bar');
+    if (bar) bar.setAttribute('aria-valuenow', '100');
+    if (!skipAnimate) {
+      ready?.classList.remove('hidden');
+    }
+    const delay = skipAnimate ? 0 : 350;
+    setTimeout(() => {
+      el.classList.add('is-done');
+      el.setAttribute('aria-hidden', 'true');
+      document.body.classList.add('is-loaded');
+      try {
+        sessionStorage.setItem(STORAGE_KEY, '1');
+      } catch (e) {
+        /* private mode */
+      }
+      window.dispatchEvent(new Event('siteLoaded'));
+    }, delay);
+  }
+
+  let skip = false;
+  try {
+    skip = sessionStorage.getItem(STORAGE_KEY) === '1';
+  } catch (e) {
+    skip = false;
+  }
+
+  if (skip) {
+    finish(true);
+    return;
+  }
+
+  let p = 0;
+  const goal = 100;
+  const duration = 1800;
+  const t0 = performance.now();
+
+  function frame(now) {
+    const t = Math.min(1, (now - t0) / duration);
+    p = Math.round(t * goal);
+    fill.style.width = p + '%';
+    pct.textContent = p + '%';
+    const bar = el.querySelector('.preloader__bar');
+    if (bar) bar.setAttribute('aria-valuenow', String(p));
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      finish(false);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/** Кастомный курсор */
+function initCursor() {
+  const cur = document.getElementById('cursor');
+  if (!cur) return;
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  if (isCoarse) return;
+
+  document.body.classList.add('has-custom-cursor');
+  let mx = 0;
+  let my = 0;
+  let lx = 0;
+  let ly = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    const target = e.target.closest('a, button, .format-card, .case-card, .faq-q, input, textarea');
+    cur.classList.toggle('is-pointer', !!target);
+  });
+
+  cur.style.left = '0';
+  cur.style.top = '0';
+
+  function loop() {
+    lx += (mx - lx) * 0.18;
+    ly += (my - ly) * 0.18;
+    cur.style.transform = `translate(${lx}px, ${ly}px) translate(-50%, -50%)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/** Меню-бургер */
+function initMobileMenu() {
+  const btn = document.getElementById('burger');
+  const drawer = document.getElementById('mobile-drawer');
+  if (!btn || !drawer) return;
+
+  btn.addEventListener('click', () => {
+    const open = drawer.hasAttribute('hidden');
+    drawer.toggleAttribute('hidden', !open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  drawer.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      drawer.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', 'false');
+    })
+  );
+}
+
+/** Бегущая строка инструментов в блоке «О себе» */
+function initMarquee() {
+  const track = document.getElementById('tools-marquee-track');
+  if (!track) return;
+  const items = [
+    'ChatGPT',
+    'Claude',
+    'Midjourney',
+    'NanoBanana',
+    'Figma',
+    'CapCut',
+    'Seedance',
+    'Cursor',
+    'ElevenLabs',
+    'Tilda',
+    'iSpring',
+  ];
+  const chunk = items.join(' · ') + ' · ';
+  track.textContent = chunk + chunk;
+}
+
+/** Рендер сеток */
+/** Положение подписи узла орбиты (SVG-координаты от центра узла) */
+function coreNodeLabelAttrs(c) {
+  switch (c.position) {
+    case 'top':
+      return 'x="0" y="44" text-anchor="middle"';
+    case 'bottom':
+      return 'x="0" y="-40" text-anchor="middle"';
+    case 'right':
+      return 'x="44" y="5" text-anchor="start"';
+    case 'left':
+      return 'x="-44" y="5" text-anchor="end"';
+    default:
+      return 'y="44" text-anchor="middle"';
+  }
+}
+
+function renderFormats() {
+  const grid = document.getElementById('formats-grid');
+  if (!grid) return;
+  grid.innerHTML = FORMATS.map(
+    (f) => `
+    <article class="format-card" data-id="${f.id}" role="button" tabindex="0">
+      <span class="format-card__code">${f.code}</span>
+      <div class="format-card__icon">${f.icon}</div>
+      <h4 class="format-card__title">${f.title}</h4>
+      <p class="format-card__sub">${f.subtitle}</p>
+      <p class="format-card__desc">${f.description}</p>
+    </article>`
+  ).join('');
+
+  grid.querySelectorAll('.format-card').forEach((card) => {
+    const open = () => openFormatModal(card.dataset.id);
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
+}
+
+function openFormatModal(id) {
+  const f = FORMATS.find((x) => x.id === id);
+  const overlay = document.getElementById('modal-overlay');
+  const body = document.getElementById('modal-body');
+  if (!f || !overlay || !body) return;
+  body.innerHTML = `
+    <p class="mono-tag">${f.id}</p>
+    <h3 id="modal-title" class="section-subheading">${f.icon} ${f.title}</h3>
+    <p class="mono">${f.subtitle}</p>
+    <p>${f.description}</p>
+    <p class="mono" style="margin-top:1rem;">ЛУЧШЕ ВСЕГО ДЛЯ</p>
+    <p style="background:var(--bg-elevated);padding:0.75rem;border-radius:4px;">${f.bestFor}</p>
+    <p class="mono" style="margin-top:1rem;">ВКЛЮЧАЕТ</p>
+    <ul class="format-modal__feat">${f.features.map((x) => `<li>${x}</li>`).join('')}</ul>
+    <p class="mono">Срок: ${f.duration}</p>
+  `;
+  overlay.classList.remove('hidden');
+  document.getElementById('modal-close').focus();
+}
+
+function closeModals() {
+  document.getElementById('modal-overlay')?.classList.add('hidden');
+  document.getElementById('case-overlay')?.classList.add('hidden');
+  document.getElementById('cert-overlay')?.classList.add('hidden');
+  document.querySelector('#case-modal-body .case-modal__video')?.pause();
+}
+
+function renderCollab() {
+  const grid = document.getElementById('collab-grid');
+  if (!grid) return;
+  grid.innerHTML = COLLABORATION.map(
+    (c) => `
+    <article class="collab-card">
+      <span class="collab-card__code">${c.code}</span>
+      <div class="aud-card__icon">${c.icon}</div>
+      <h4>${c.title}</h4>
+      <p class="mono">${c.subtitle}</p>
+      <p>${c.description}</p>
+      <ul class="collab-stages">
+        ${c.stages
+          .map(
+            (s) => `
+          <li><strong>${s.num}</strong> ${s.name}<span>${s.detail}</span></li>`
+          )
+          .join('')}
+      </ul>
+      <p class="mono">Срок: ${c.duration}</p>
+      <p class="mono">${c.forWhom}</p>
+    </article>`
+  ).join('');
+}
+
+function renderMaterials() {
+  const grid = document.getElementById('materials-grid');
+  if (!grid) return;
+  grid.innerHTML = MATERIALS.map(
+    (m) => `
+    <div class="material-chip">
+      <span class="material-chip__icon">${m.icon}</span>
+      <div class="material-chip__title">${m.title}</div>
+      <p class="material-chip__desc">${m.description}</p>
+    </div>`
+  ).join('');
+}
+
+function renderTools() {
+  const grid = document.getElementById('tools-grid');
+  if (!grid) return;
+  grid.innerHTML = TOOLS.map(
+    (t) => `
+    <div class="tool-cell">
+      <div class="tool-cat">${t.category}</div>
+      <div class="tool-name">${t.name}</div>
+      <p class="tool-use">${t.use}</p>
+    </div>`
+  ).join('');
+}
+
+function renderAudience() {
+  const grid = document.getElementById('audience-grid');
+  if (!grid) return;
+  grid.innerHTML = AUDIENCES.map(
+    (a) => `
+    <article class="aud-card">
+      <div class="aud-card__icon">${a.icon}</div>
+      <h4>${a.title}</h4>
+      <p class="mono">${a.subtitle}</p>
+      <p>${a.description}</p>
+      <div class="aud-tags">${a.tags.map((t) => `<span>${t}</span>`).join('')}</div>
+      <a href="#contact" class="btn btn--ghost btn--small">▶ ОБСУДИТЬ ПРОЕКТ</a>
+    </article>`
+  ).join('');
+}
+
+function renderCases() {
+  const grid = document.getElementById('cases-grid');
+  if (!grid) return;
+  grid.innerHTML = CASES.map(
+    (c) => `
+    <article class="case-card${c.coverPosition === 'left' ? ' case-card--cover-left' : ''}" data-case="${c.id}" role="button" tabindex="0">
+      <div class="case-card__img-wrap">
+        <img src="${c.cover}" alt="" loading="lazy" width="800" height="500" />
+        <div class="case-card__overlay mono">
+          <span>${c.metrics.completion} завершили</span>
+          <span>${c.metrics.satisfaction} NPS/NPS*</span>
+        </div>
+      </div>
+      <div class="case-card__meta">
+        <p class="mono">${c.year} · ${c.industry} · ${c.client}</p>
+        <h4>${c.title}</h4>
+        <p>${c.description}</p>
+      </div>
+    </article>`
+  ).join('');
+
+  grid.querySelectorAll('.case-card').forEach((card) => {
+    const handler = () => openCase(card.dataset.case);
+    card.addEventListener('click', handler);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handler();
+      }
+    });
+  });
+}
+
+function openCase(id) {
+  const c = CASES.find((x) => x.id === id);
+  const overlay = document.getElementById('case-overlay');
+  const body = document.getElementById('case-modal-body');
+  if (!c || !overlay || !body) return;
+  const mediaBlock = c.demoVideo
+    ? `<div class="case-modal__media case-modal__media--video">
+        <div class="case-modal__video-shell">
+          <video class="case-modal__video" src="${encodeURI(c.demoVideo)}" preload="metadata" playsinline></video>
+          <div class="case-modal__video-cover">
+            <button type="button" class="case-modal__cover-play" aria-label="Воспроизвести скринкаст">
+              <span class="case-modal__cover-play-icon" aria-hidden="true">▶</span>
+            </button>
+            <p class="case-modal__cover-hint">Нажмите на кнопку плей, чтобы посмотреть скринкаст</p>
+          </div>
+        </div>
+        <div class="case-modal__video-controls">
+          <button type="button" class="btn btn--ghost btn--small case-modal__play-btn" aria-label="Воспроизвести">▶ Плей</button>
+          <button type="button" class="btn btn--ghost btn--small case-modal__pause-btn" aria-label="Пауза">❚❚ Пауза</button>
+        </div>
+      </div>`
+    : `<img class="case-modal__cover" src="${c.cover}" alt="" loading="lazy" />`;
+  body.innerHTML = `
+    <p class="mono-tag">${c.id}</p>
+    <h3 id="case-modal-title">${c.title}</h3>
+    <p class="mono">${c.year} · ${c.client} · ${c.industry}</p>
+    ${mediaBlock}
+    <p>${c.description}</p>
+    <p class="mono">Метрики: ${c.metrics.completion ? `завершили ${c.metrics.completion}, ` : ''}отзывы ${c.metrics.satisfaction}, срок ${c.metrics.duration}</p>
+    <a href="#contact" class="btn btn--primary">▶ ХОЧУ ТАКОЙ ПРОЕКТ</a>
+  `;
+  const videoEl = body.querySelector('.case-modal__video');
+  const cover = body.querySelector('.case-modal__video-cover');
+  const coverPlay = body.querySelector('.case-modal__cover-play');
+  const playBtn = body.querySelector('.case-modal__play-btn');
+  const pauseBtn = body.querySelector('.case-modal__pause-btn');
+  if (videoEl && cover && playBtn && pauseBtn) {
+    const hideCover = () => {
+      cover.classList.add('is-hidden');
+      cover.setAttribute('aria-hidden', 'true');
+    };
+    const startPlayback = () => {
+      hideCover();
+      videoEl.play().catch(() => {});
+    };
+    playBtn.addEventListener('click', startPlayback);
+    coverPlay?.addEventListener('click', startPlayback);
+    pauseBtn.addEventListener('click', () => {
+      videoEl.pause();
+    });
+    videoEl.addEventListener('play', hideCover);
+  }
+  overlay.classList.remove('hidden');
+}
+
+function renderBlog() {
+  const list = document.getElementById('blog-list');
+  if (!list) return;
+  list.innerHTML = BLOG_POSTS.map(
+    (p) => `
+    <a href="${p.href}" class="blog-item">
+      <h4>${p.title}</h4>
+      <p class="blog-item__excerpt">${p.excerpt}</p>
+      <p class="blog-meta">${p.date} · ${p.mins}</p>
+    </a>`
+  ).join('');
+}
+
+let faqActiveCat = 'all';
+
+function renderFaq() {
+  const filt = document.getElementById('faq-filters');
+  const list = document.getElementById('faq-list');
+  if (!filt || !list) return;
+
+  filt.innerHTML = FAQ_CATS.map(
+    (c) =>
+      `<button type="button" class="faq-filter-btn ${faqActiveCat === c.id ? 'is-active' : ''}" data-cat="${c.id}">${c.label}</button>`
+  ).join('');
+
+  filt.querySelectorAll('.faq-filter-btn').forEach((b) =>
+    b.addEventListener('click', () => {
+      faqActiveCat = b.dataset.cat;
+      renderFaq();
+    })
+  );
+
+  const filtered = FAQ_ITEMS.filter((item) => faqActiveCat === 'all' || item.cat === faqActiveCat);
+
+  list.innerHTML = filtered
+    .map(
+      (item, idx) => `
+    <div class="faq-item" data-faq-i="${idx}">
+      <button type="button" class="faq-q" aria-expanded="false">
+        <code>${item.code}</code>
+        <span>${item.q}</span>
+      </button>
+      <div class="faq-a"><div class="faq-a__inner"><div class="faq-a__content">${item.a}</div></div></div>
+    </div>`
+    )
+    .join('');
+
+  list.querySelectorAll('.faq-q').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest('.faq-item');
+      const open = wrap.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    })
+  );
+}
+
+/** Метрики ядра */
+function calcMetrics(ids) {
+  const comps = COMPONENTS.filter((c) => ids.includes(c.id));
+  return {
+    completeness: comps.reduce((s, c) => s + c.weights.completeness, 0),
+    engagement: comps.reduce((s, c) => s + c.weights.engagement, 0),
+    quality: comps.reduce((s, c) => s + c.weights.quality, 0),
+  };
+}
+
+function initCourseCore() {
+  const svg = document.getElementById('core-svg');
+  const nodesG = document.getElementById('core-nodes');
+  const linesG = document.getElementById('core-lines');
+  const desc = document.getElementById('core-desc');
+  const statusEl = document.getElementById('core-status');
+  const metricsEl = document.getElementById('core-metrics');
+  const centerEl = document.getElementById('core-center');
+  if (!svg || !nodesG || !linesG || !desc) return;
+
+  const CX = 200;
+  const CY = 200;
+  let active = [];
+  /** Порядок «последнего выбора» для чипов */
+  let lastOrder = [];
+  /** Какой активный компонент показать в левой колонке при нескольких выбранных */
+  let focusedId = null;
+
+  nodesG.innerHTML = COMPONENTS.map(
+    (c) => `
+    <g class="core-node" data-core="${c.id}" transform="translate(${c.cx},${c.cy})">
+      <circle class="core-node__ring core-node__ring--hit" r="28"/>
+      <text text-anchor="middle" dy="0.35em" fill="currentColor" font-size="14" font-family="JetBrains Mono, monospace">${c.icon}</text>
+      <text class="core-node__label" ${coreNodeLabelAttrs(c)} fill="#f96c36" font-size="11">${c.circleLabel}</text>
+    </g>`
+  ).join('');
+
+  function renderLines() {
+    linesG.innerHTML = '';
+    active.forEach((id) => {
+      const c = COMPONENTS.find((x) => x.id === id);
+      if (!c) return;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', String(c.cx));
+      line.setAttribute('y1', String(c.cy));
+      line.setAttribute('x2', String(CX));
+      line.setAttribute('y2', String(CY));
+      line.setAttribute('class', 'core-line');
+      linesG.appendChild(line);
+    });
+  }
+
+  function updateHud() {
+    const n = active.length;
+    let label = '[ STATUS: ' + n + '/4 ACTIVE • CORE: ';
+    if (n === 0) label += 'STANDBY ]';
+    else if (n < 4) label += 'INITIALIZING ]';
+    else label += '● ONLINE ]';
+    if (statusEl) statusEl.textContent = label;
+
+    nodesG.querySelectorAll('.core-node').forEach((g) => {
+      const id = g.getAttribute('data-core');
+      g.classList.toggle('is-on', active.includes(id));
+    });
+
+    renderLines();
+
+    const m = calcMetrics(active);
+    if (metricsEl) {
+      const metricLabels = ['Полнота', 'Вовлечённость', 'Качество'];
+      metricsEl.innerHTML = metricLabels
+        .map((label, i) => {
+          const vals = [m.completeness, m.engagement, m.quality];
+          const v = vals[i];
+          return `
+        <div class="metric-row">
+          <span class="metric-label">${label}</span>
+          <div class="metric-bar"><span style="width:${Math.min(v, 100)}%"></span></div>
+          <span class="metric-value">${Math.min(v, 100)}%</span>
+        </div>`;
+        })
+        .join('');
+    }
+
+    if (centerEl) {
+      centerEl.classList.toggle('is-full', n === 4);
+    }
+
+    /** Левая колонка текста — состояния по ТЗ */
+    if (active.length === 0) {
+      desc.innerHTML = `
+        <h4>НИ ОДИН КОМПОНЕНТ НЕ АКТИВИРОВАН</h4>
+        <div class="about-bio">
+          <p>Каждый мой курс собран из 4 ключевых элементов. Уберите любой — и курс перестанет работать.</p>
+          <p class="core-desc__hint">Нажмите по кругу справа, чтобы увидеть детали и влияние на метрики.</p>
+        </div>
+        <div class="chips"></div>`;
+    } else if (active.length === 4) {
+      desc.innerHTML = `
+        <h4>✦ ЯДРО АКТИВНО</h4>
+        <div class="about-bio">
+          <p>Все 4 компонента вместе — это методология целиком.</p>
+          <p><strong>История</strong> делает интересным, <strong>Игра</strong> — вовлекающим, <strong>Методология</strong> — полезным, <strong>ИИ</strong> — современным.</p>
+          <p>Хотите такую сборку?</p>
+        </div>
+        <a href="#contact" class="btn btn--primary btn--small">▶ ОБСУДИТЬ ПРОЕКТ</a>`;
+    } else {
+      const chips = [...active].reverse();
+      const currentId = focusedId && active.includes(focusedId) ? focusedId : lastOrder[lastOrder.length - 1];
+      focusedId = currentId;
+      const show = COMPONENTS.find((c) => c.id === currentId) || COMPONENTS.find((c) => c.id === chips[0]);
+      desc.innerHTML = `
+        <div class="chips mono" style="margin-bottom:0.5rem;">
+          АКТИВНО:
+          ${chips
+            .map((id) => {
+              const comp = COMPONENTS.find((c) => c.id === id);
+              return `<button type="button" class="chip ${id === currentId ? 'is-active' : ''}" data-show="${id}">${comp.icon}</button>`;
+            })
+            .join(' ')}
+        </div>
+        <h4>${show.code} ${show.icon} ${show.title}</h4>
+        <p class="mono">${show.subtitle}</p>
+        <div class="about-bio">
+          <p>${show.description}</p>
+          <p class="mono">── ВКЛЮЧАЕТ ──</p>
+          ${show.includes.map((x) => `<p> ▸ ${x}</p>`).join('')}
+          <p class="mono">── ВЛИЯНИЕ НА КУРС ──</p>
+          <p class="mono">Полнота +${show.weights.completeness}% · Вовлечённость +${show.weights.engagement}% · Качество +${show.weights.quality}%</p>
+        </div>`;
+      desc.querySelectorAll('.chip').forEach((btn) =>
+        btn.addEventListener('click', () => {
+          focusedId = btn.dataset.show;
+          updateHud();
+        })
+      );
+    }
+  }
+
+  nodesG.querySelectorAll('.core-node').forEach((g) => {
+    g.addEventListener('click', () => {
+      const id = g.getAttribute('data-core');
+      if (active.includes(id)) {
+        active = active.filter((x) => x !== id);
+        lastOrder = lastOrder.filter((x) => x !== id);
+        if (focusedId === id) focusedId = lastOrder[lastOrder.length - 1] ?? null;
+      } else {
+        active.push(id);
+        lastOrder.push(id);
+        focusedId = id;
+      }
+      updateHud();
+    });
+  });
+
+  document.getElementById('core-reset')?.addEventListener('click', () => {
+    active = [];
+    lastOrder = [];
+    focusedId = null;
+    updateHud();
+  });
+
+  document.getElementById('core-activate-all')?.addEventListener('click', () => {
+    active = [];
+    lastOrder = [];
+    focusedId = null;
+    COMPONENTS.forEach((c, i) => {
+      setTimeout(() => {
+        if (!active.includes(c.id)) {
+          active.push(c.id);
+          lastOrder.push(c.id);
+          focusedId = c.id;
+        }
+        updateHud();
+      }, i * 220);
+    });
+  });
+
+  updateHud();
+}
+
+/** Сравнение до/после — статичная сётка без слайдера */
+function initCompare() {
+  const wrap = document.getElementById('compare-static');
+  if (!wrap) return;
+  const beforeBars = wrap.querySelector('[data-compare-bars="before"]');
+  const afterBars = wrap.querySelector('[data-compare-bars="after"]');
+  if (!beforeBars || !afterBars) return;
+  beforeBars.innerHTML = barBlock({ engagement: 10, completion: 20, retention: 10 }, false);
+  afterBars.innerHTML = barBlock({ engagement: 90, completion: 85, retention: 75 }, true);
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((ent) => {
+        if (!ent.isIntersecting) return;
+        afterBars.querySelectorAll('.metric-bar span').forEach((s) => {
+          const pct = s.dataset.fill;
+          if (pct) s.style.width = pct + '%';
+        });
+        io.disconnect();
+      });
+    },
+    { threshold: 0.25 }
+  );
+  io.observe(wrap);
+}
+
+/** Визуальный слайдер «до / после» (перетаскивание границы) */
+function initShowcaseBeforeAfter() {
+  const viewport = document.getElementById('showcase-ba-viewport');
+  const afterLayer = document.getElementById('showcase-after-layer');
+  const handle = document.getElementById('showcase-ba-handle');
+  if (!viewport || !afterLayer || !handle) return;
+
+  let pct = 50;
+  let draggingHandle = false;
+  let draggingViewport = false;
+
+  function revealFrost() {
+    viewport.classList.add('is-ba-revealed');
+  }
+
+  function apply() {
+    const p = Math.max(0, Math.min(100, pct));
+    afterLayer.style.clipPath = `polygon(${p}% 0, 100% 0, 100% 100%, ${p}% 100%)`;
+    handle.style.left = `${p}%`;
+    handle.setAttribute('aria-valuenow', String(Math.round(p)));
+  }
+
+  function clientToPct(clientX) {
+    const r = viewport.getBoundingClientRect();
+    if (r.width <= 0) return pct;
+    return Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
+  }
+
+  function onMove(clientX) {
+    pct = clientToPct(clientX);
+    apply();
+  }
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (handle.contains(e.target)) return;
+    draggingViewport = true;
+    onMove(e.clientX);
+  });
+
+  handle.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    draggingHandle = true;
+    revealFrost();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (draggingHandle) {
+      onMove(e.clientX);
+      return;
+    }
+    if (draggingViewport && e.buttons === 1) {
+      revealFrost();
+      onMove(e.clientX);
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    draggingHandle = false;
+    draggingViewport = false;
+  });
+
+  viewport.addEventListener(
+    'touchstart',
+    (e) => {
+      const t = e.targetTouches[0];
+      if (!t) return;
+      if (handle.contains(e.target)) return;
+      draggingViewport = true;
+      onMove(t.clientX);
+    },
+    { passive: true }
+  );
+
+  handle.addEventListener(
+    'touchstart',
+    () => {
+      draggingHandle = true;
+      revealFrost();
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!draggingHandle && !draggingViewport) return;
+      revealFrost();
+      const t = e.targetTouches[0];
+      if (t) onMove(t.clientX);
+    },
+    { passive: true }
+  );
+
+  window.addEventListener('touchend', () => {
+    draggingHandle = false;
+    draggingViewport = false;
+  });
+
+  handle.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      revealFrost();
+      pct = Math.max(0, pct - 5);
+      apply();
+    } else if (e.key === 'ArrowRight') {
+      revealFrost();
+      pct = Math.min(100, pct + 5);
+      apply();
+    }
+  });
+
+  window.addEventListener('resize', apply);
+  apply();
+}
+
+function barBlock(vals, animate) {
+  const rows = [
+    ['ВОВЛЕЧЁННОСТЬ', vals.engagement],
+    ['ЗАВЕРШЕНИЕ', vals.completion],
+    ['УДЕРЖАНИЕ', vals.retention],
+  ];
+  return rows
+    .map(([lab, val]) => {
+      const filled = animate ? `<span style="width:0%" data-fill="${val}"></span>` : `<span style="width:${val}%"></span>`;
+      return `
+      <div class="bar-row mono">${lab}</div>
+      <div class="metric-row">
+        <div class="metric-bar">${filled}</div>
+        <span class="mono" style="min-width:2.5rem">${val}%</span>
+      </div>
+      <div class="bar-visual">${'▓'.repeat(Math.ceil(val / 10))}${'░'.repeat(10 - Math.ceil(val / 10))}</div>`;
+    })
+    .join('');
+}
+
+/** Появление панелей и fade-in элементов при скролле */
+function initScrollReveal() {
+  const panels = document.querySelectorAll('.panel');
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        en.target.classList.toggle('is-out', !en.isIntersecting);
+        en.target.classList.toggle('is-in', en.isIntersecting);
+      });
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+  );
+  panels.forEach((p) => io.observe(p));
+
+  /** fade-ins */
+  const fadels = document.querySelectorAll('.fade-in');
+  const io2 = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('is-visible');
+        obs.unobserve(en.target);
+      });
+    },
+    { threshold: 0.05 }
+  );
+  fadels.forEach((el) => io2.observe(el));
+
+  /** Волна появления карточек инструментов */
+  const toolCells = document.querySelectorAll('#tools-grid .tool-cell');
+  const io3 = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        toolCells.forEach((cell, i) => {
+          cell.style.opacity = '0';
+          cell.style.transform = 'translateY(12px)';
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              cell.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+              cell.style.opacity = '1';
+              cell.style.transform = 'translateY(0)';
+            }, i * 50);
+          });
+        });
+        obs.disconnect();
+      });
+    },
+    { threshold: 0.08 }
+  );
+  if (toolCells.length) io3.observe(document.getElementById('toolkit'));
+}
+
+/** Герой — вход: теги/мета fade-in и «печать» заголовка */
+function initHeroExtras() {
+  const title = document.getElementById('hero-title');
+
+  /** «Печать» заголовка: постепенная прозрачность строк уже видна через CSS animate — добавим класс ко входу */
+  window.addEventListener('siteLoaded', () => {
+    document.querySelectorAll('.section--hero .fade-in').forEach((el) => el.classList.add('is-visible'));
+
+    if (!title) return;
+    const lines = title.querySelectorAll('.hero__title-line');
+    lines.forEach((ln, i) => {
+      ln.style.opacity = '0';
+      ln.style.transform = 'translateY(12px)';
+      setTimeout(() => {
+        ln.style.transition = 'opacity 0.8s cubic-bezier(.22,1,.36,1), transform 0.8s cubic-bezier(.22,1,.36,1)';
+        ln.style.opacity = '1';
+        ln.style.transform = 'translateY(0)';
+      }, 120 + i * 180);
+    });
+    triggerGlitch(title.querySelector('.glitch-target'));
+  });
+}
+
+/** Случайный лёгкий глитч */
+function glitchLoop() {
+  const targets = document.querySelectorAll('.glitch-target, .section-heading');
+  setInterval(() => {
+    if (!targets.length) return;
+    const el = targets[Math.floor(Math.random() * targets.length)];
+    triggerGlitch(el);
+  }, 42000 + Math.random() * 20000);
+}
+
+function triggerGlitch(el) {
+  if (!el) return;
+  el.classList.remove('is-glitch');
+  void el.offsetWidth;
+  el.classList.add('is-glitch');
+  setTimeout(() => el.classList.remove('is-glitch'), 380);
+}
+
+/** Материалы CTA скролл к контактам */
+function initMiscButtons() {
+  document.getElementById('btn-materials-cta')?.addEventListener('click', () => {
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+function initEducationCertsModal() {
+  const paths = EDUCATION_CERT_IMAGES.filter(Boolean);
+  const n = paths.length;
+  let idx = 0;
+
+  const overlay = document.getElementById('cert-overlay');
+  const btnOpen = document.getElementById('btn-about-education');
+  const imgEl = document.getElementById('cert-slide-img');
+  const prevBtn = document.getElementById('cert-prev');
+  const nextBtn = document.getElementById('cert-next');
+  const counter = document.getElementById('cert-counter');
+  const closeBtn = document.getElementById('cert-close');
+
+  if (!overlay || !btnOpen || !imgEl || !prevBtn || !nextBtn || !counter || n === 0) {
+    if (btnOpen && n === 0) btnOpen.style.display = 'none';
+    return;
+  }
+
+  function show(i) {
+    idx = ((i % n) + n) % n;
+    imgEl.src = paths[idx];
+    imgEl.alt = `Сертификат — слайд ${idx + 1} из ${n}`;
+    counter.textContent = `${idx + 1} / ${n}`;
+  }
+
+  btnOpen.addEventListener('click', () => {
+    show(0);
+    overlay.classList.remove('hidden');
+    closeBtn?.focus();
+  });
+
+  prevBtn.addEventListener('click', () => show(idx - 1));
+  nextBtn.addEventListener('click', () => show(idx + 1));
+
+  closeBtn?.addEventListener('click', closeModals);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModals();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (overlay.classList.contains('hidden')) return;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      show(idx - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      show(idx + 1);
+    }
+  });
+}
+
+function initModalClosers() {
+  document.getElementById('modal-close')?.addEventListener('click', closeModals);
+  document.getElementById('case-close')?.addEventListener('click', closeModals);
+  document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModals();
+  });
+  document.getElementById('case-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'case-overlay') closeModals();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModals();
+  });
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  initStars(document.getElementById('stars-canvas'));
+  runPreloader();
+  initCursor();
+  initMobileMenu();
+  initMarquee();
+  renderFormats();
+  renderCollab();
+  renderMaterials();
+  renderTools();
+  renderAudience();
+  renderCases();
+  renderBlog();
+  renderFaq();
+  initCourseCore();
+  initShowcaseBeforeAfter();
+  initCompare();
+  initScrollReveal();
+  initHeroExtras();
+  initMiscButtons();
+  initEducationCertsModal();
+  initModalClosers();
+  glitchLoop();
+});
